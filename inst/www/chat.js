@@ -1,6 +1,15 @@
+// Edit input leaves focus
+$(document).on("blur", ".qu-edit",function(e) {
+  var obj = e.currentTarget;
+  var id = obj.id;
+  var val = $(obj).val();
+  Shiny.onInputChange("qu-edit-blur", {eventId:"qu-edit-blur",id: "qu-edit-blur", input_id: id, value: val, nonce: Math.random()});
+});
+
 startQuizRunTime = function() {
   window.quizTimeMode="runtime";
   window.quizStartTime = (new Date()).getTime();
+  clearTimeout(window.quizTimer);
   window.quizTimer = setInterval(showQuizRunTime, 1000);
 };
 stopQuizTimer = function() {
@@ -10,6 +19,7 @@ stopQuizTimer = function() {
 startQuizCountdown = function(secs) {
   window.quizTimeMode="countdown";
   window.quizEndTime = (new Date()).getTime() + secs*1000;
+  clearTimeout(window.quizTimer);
   window.quizTimer = setInterval(showQuizRunTime, 1000);
 };
 
@@ -63,7 +73,6 @@ function setInvisible(sel) {
 function setVisible(sel) {
   $(sel).removeClass("invisible");
 }
-
 
 $(document).on("click","#quizShowBtn", function (e) {
   showQuizPane("quizShow");

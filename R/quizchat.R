@@ -2,16 +2,7 @@
 quizchat.example = function() {
   restore.point.options(display.restore.point = TRUE)
   library(shinyEvents)
-  yaml = "
-question: |
-  What is the 3rd letter?
-sc:
-  - A and I write a much longer text, so I can see what else I could have written here......... Yea Yeh!!!
-  - B
-  - C*
-  - D
-"
-  app = quizChatApp(quiz.yaml = yaml)
+  app = quizChatApp(lang="de")
   viewQuizChat(app,roles=c("client", "admin"))
 }
 
@@ -26,17 +17,13 @@ viewQuizChat = function(app, roles=c("client","admin")) {
   viewApp(app,launch.browser = launch.admin.client)
 }
 
-quizChatApp = function(title="QuizChat", admin.password, quiz.yaml=NULL, lang="de") {
+quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.login = FALSE) {
   restore.point("quizChatApp")
   app = eventsApp()
   glob = app$glob
+  glob$admin.password = admin.password
+  glob$auto.login = auto.login
   init.qc.globals(app, lang=lang)
-  if (!is.null(quiz.yaml)) {
-    qu = makeQuiz(yaml=quiz.yaml)
-    set.quiz(qu)
-  } else {
-    qu = NULL
-  }
   app$ui = fluidPage(title = title,
     quizchat.headers(),
     uiOutput("mainUI")
@@ -66,8 +53,11 @@ quizChatApp = function(title="QuizChat", admin.password, quiz.yaml=NULL, lang="d
 init.qc.globals = function(app, n=100, push.msg=TRUE, push.past.secs=30, lang="de") {
   glob = app$glob
   glob$lang = lang
+
+  set.default.templates()
+
   glob$app.counter = 0
-  glob$cur.qu = NULL
+  glob$qu.run = NULL
   glob$num.send = glob$num.resend = 0
 
   glob$quiz.runs = FALSE

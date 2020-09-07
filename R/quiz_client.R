@@ -37,10 +37,14 @@ init.client.app.instance = function(app=getApp()) {
 }
 
 client.quiz.start = function(app=getApp()) {
-  qu = app$glob$cur.qu
+  qu = app$glob$qu.run
+
+
   if (!is.null(qu)) {
-    setUI("quizUI", qu$client.ui)
-    evalJS('$("#btn-quiz-send").removeClass("invisible");')
+    dsetUI("quizUI", qu$client.ui)
+    set.invisible("#no-quiz-runs-msg")
+    set.visible("#quiz-outer")
+    #evalJS('$("#btn-quiz-send").removeClass("invisible");')
   }
   setUI("quiz-msgUI","")
   set.client.quiz.timer()
@@ -61,14 +65,16 @@ stop.client.quiz.timer = function(timer = glob$timer, app=getApp(), glob=app$glo
 
 show.client.quiz.stop = function(app=getApp()) {
   restore.point("show.client.quiz.stop")
-  evalJS('$("#btn-quiz-send").addClass("invisible");')
-  setUI("quiz-msgUI", HTML(paste0("The quiz has stopped.")))
+  #evalJS('$("#btn-quiz-send").addClass("invisible");')
+  #setUI("quiz-msgUI", HTML(paste0("The quiz has stopped.")))
   stop.client.quiz.timer()
+  set.visible("#no-quiz-runs-msg")
+  set.invisible("#quiz-outer")
 }
 
 show.client.quiz.send = function(choice, app=getApp()) {
   restore.point("show.client.quiz.send")
-  setUI("quiz-msgUI", HTML(paste0("You send answer no. ", choice,". You can update it until the quiz stops.")))
+  dsetUI("quiz-msgUI", HTML(paste0("You send answer no. ", choice,". You can update it until the quiz stops.")))
 }
 
 
@@ -100,19 +106,26 @@ send.client.quiz.answer = function(value, idnum=app$idnum, app=getApp()) {
   show.client.quiz.send(choice)
 }
 
-quiz.client.outer.ui = function() {
-  html = '
-<div id="quiz-outer" class="col-md-6">
+quiz.client.outer.ui = function(app=getApp()) {
+  quiz.runs = app$glob$quiz.runs
+  qu = app$glob$qu.run
+  html = paste0('
+<div id="no-quiz-runs-msg" class="row ', if (quiz.runs) 'invisible','">
+  <div class="col-md-5">
+    <center></center>
+  </div>
+</div>
+<div id="quiz-outer" class="col-md-5 ', if (!quiz.runs) 'invisible','">
   <div class="panel panel-primary">
     <div class="panel-heading">
         Quiz  <span style="padding-left: 1em" id="quiz-time"></span>
     </div>
     <div id="quiz-body" class="panel-body" style="height: 24em">
-      <div id="quizUI" class="shiny-html-output"></div>
-      <button class="btn btn-qc btn-sm invisible" id="btn-quiz-send">Send</button>
+      <div id="quizUI" class="shiny-html-output">', if (quiz.runs) as.character(qu$client.ui), '</div>
+      <button class="btn btn-qc btn-sm" id="btn-quiz-send">Send</button>
     </div>
   </div>
-</div>'
+</div>')
 
   HTML(html)
 }

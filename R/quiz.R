@@ -20,7 +20,7 @@ qu = makeQuiz(yaml=yaml)
 #' @param quiz.handler a function that will be called if the quiz is checked.
 #'        The boolean argument solved is TRUE if the quiz was solved
 #'        and otherwise FALSE
-makeQuiz = function(id=paste0("quiz_",sample.int(10e10,1)),qu=NULL, yaml,lang="en") {
+makeQuiz = function(id=paste0("quiz_",sample.int(10e10,1)),qu=NULL, yaml) {
   restore.point("clickerQuiz")
 
   if (is.null(qu)) {
@@ -41,7 +41,7 @@ makeQuiz = function(id=paste0("quiz_",sample.int(10e10,1)),qu=NULL, yaml,lang="e
   qu
 }
 
-init.quiz = function(qu,lang="en") {
+init.quiz = function(qu) {
   restore.point("init.quiz.qu")
 
   qu$choicesId = paste0("quiz-choices")
@@ -126,7 +126,7 @@ quiz.md = function(qu, solution=FALSE) {
 }
 
 
-quiz.client.ui = function(qu, lang="en") {
+quiz.client.ui = function(qu) {
   restore.point("quiz.client.ui")
   head = list(
     HTML(qu$question.html)

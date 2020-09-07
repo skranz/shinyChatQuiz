@@ -1,0 +1,34 @@
+"AB":
+  question: Choose the right answer.
+  sc:
+    - A
+    - B
+
+"ABC":
+  question: Choose the right answer.
+  sc:
+    - A
+    - B
+    - C
+
+"ABCD":
+  question: Choose the right answer.
+  sc:
+    - A
+    - B
+    - C
+    - D
+
+"right-wrong":
+  question: Is the statement right?
+  sc:
+    - Right
+    - Wrong
+
+"right-wrong-depends":
+  question: Is the statement right?
+  sc:
+    - Right
+    - Wrong
+    - Depends
+

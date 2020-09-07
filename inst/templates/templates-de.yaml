@@ -1,0 +1,34 @@
+"AB":
+  question: Wählen Sie die richtige Antwort.
+  sc:
+    - A
+    - B
+
+"ABC":
+  question: Wählen Sie die richtige Antwort.
+  sc:
+    - A
+    - B
+    - C
+
+"ABCD":
+  question: Wählen Sie die richtige Antwort.
+  sc:
+    - A
+    - B
+    - C
+    - D
+
+"ja-nein":
+  question: Ist folgende Aussage korrekt?
+  sc:
+    - Ja
+    - Nein
+
+"ja-nein-unklar":
+  question: Ist folgende Aussage korrekt?
+  sc:
+    - Ja
+    - Nein
+    - Unklar
+

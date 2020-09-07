@@ -7,18 +7,19 @@ init.admin.app.instance = function(app=getApp()) {
   app$initials = make.initials(app$user)
   init.chat.app.instance(app)
   init.admin.handlers()
+  set.edit.quiz(app$glob$templates[[1]],update.forms = FALSE)
   show.admin.ui()
 }
 
 
 show.admin.ui = function(app=getApp()) {
-  qu = app$glob$cur.qu
   ui = tagList(
-    br(),
-    quiz.admin.outer.ui(qu),
+    br(),icon(""),
+    quiz.admin.outer.ui(),
     chat.ui()
   )
   setUI("mainUI",ui)
+
   # Note that quizResultsUI must be initially visible
   # but can be hidden now. Otherwise highcharter plots
   # are not correctly shown
@@ -27,6 +28,18 @@ show.admin.ui = function(app=getApp()) {
 
 init.admin.handlers = function(app=getApp()) {
   glob = app$glob
+
+  eventHandler("qu-edit-blur",fun = quiz.edit.blur.handler)
+
+
+  classEventHandler("template-li",event="click", fun = function(data, ..., app=getApp()) {
+    restore.point("template-li click")
+    templ.num = data$num
+    cat("Template li click!\n\n")
+    set.edit.quiz(glob$templates[[templ.num]])
+    callJS("showQuizPane","quizEdit")
+  })
+
   eventHandler("quizStartEvent",fun =  function(value, ..., app=getApp()) {
     start.quiz(timer=as.integer(value))
   })
@@ -50,21 +63,48 @@ init.admin.handlers = function(app=getApp()) {
   })
 }
 
-set.quiz = function(qu, app=getApp()) {
+# User has edited a question
+quiz.edit.blur.handler = function(value,input_id, ..., app=getApp()) {
+  restore.point("quiz.edit.blur.handler")
+  glob = app$glob
+  qu = glob$qu.edit
+  if (input_id == "questionEdit") {
+    if (value == qu$question) return()
+    qu$question = value
+    qu$question.html = md2html(value)
+  } else {
+    choice.ind = as.integer(str.right.of(input_id,"choiceEdit"))
+    if (choice.ind <= length(qu$choices)) {
+      if (value == qu$choices[choice.ind]) return()
+      qu$choices[choice.ind] = value
+    } else {
+      qu$choices = c(qu$choices,value)
+    }
+  }
+  qu$client.ui = quiz.client.ui(qu)
+  glob$qu.edit = qu
+  quiz.set.admin.show.ui()
+}
+set.edit.quiz = function(qu, app=getApp(), update.forms=TRUE) {
   glob=app$glob
-  glob$cur.qu = qu
-  glob$quiz.runs = FALSE
+  glob$qu.edit = qu
+  if (update.forms) {
+    quiz.set.admin.show.ui()
+    quiz.set.edit.ui()
+  }
+  #glob$quiz.runs = FALSE
 }
 
 
 start.quiz = function(timer=NA,app=getApp()) {
   restore.point("start.quiz")
   glob = app$glob
-  qu = glob$cur.qu
+  qu = glob$qu.edit
   if (is.null(qu)) {
     warning("Tried to start quiz even though no quiz was set.")
     return(NULL)
   }
+  glob$qu.run = qu
   if (is.null(glob$ans.df)) {
     n = max(50, round(glob$app.counter*1.1))
     glob$ans.df = data.frame(idnum=1:n, choice = NA_integer_)
@@ -97,37 +137,53 @@ admin.set.quiz.timer = function(timer, app=getApp()) {
 stop.quiz = function(app=getApp()) {
   glob = app$glob
   glob$quiz.runs = FALSE
-  glob$res.qu = glob$cur.qu
+  glob$qu.res = glob$qu.run
   # Adapt admin UI
   glob$rv.stop.nonce(runif(1))
   evalJS('$("#btn-quiz-start").removeClass("invisible");
           $("#btn-quiz-stop").addClass("invisible");')
-  callJS("stopQuizRunTime")
+  callJS("stopQuizTimer")
   callJS("setQuizResultsPane")
   show.quiz.results()
 }
 
 
-quiz.admin.outer.ui = function(qu=app$glob$cur.qu, app=getApp()) {
+quiz.admin.outer.ui = function(app=getApp()) {
+  glob = app$glob
   quiz.runs = app$glob$quiz.runs
 
+  templ = names(glob$templates)
   html = paste0('
 <div id="quiz-outer" class="col-md-6">
   <div class="panel panel-primary">
     <div class="panel-heading">
-        Quiz
-        <button class="btn btn-qc btn-xs" class="quiz-tab-btn" id="quizShowBtn"
-       style="margin-left: 2em;">Show</button>
-        <button class="btn btn-qc btn-xs" class="quiz-tab-btn" id="quizEditBtn"
-       style="">Edit</button>
-        <button class="btn btn-qc btn-xs" class="quiz-tab-btn" id="quizResultsBtn"
-       style="">Results</button>
+      Quiz
+      <button class="btn btn-qc btn-xs quiz-tab-btn" id="quizShowBtn"
+     style="margin-left: 2em;">Show</button>
+      <button class="btn btn-qc btn-xs quiz-tab-bt" id="quizEditBtn"
+     style="">Edit</button>
+      <button class="btn btn-qc btn-xs quiz-tab-btn" id="quizResultsBtn"
+     style="">Results</button>
+      <span class="pull-right">
+
+        <button class="btn btn-qc btn-xs" id="quiz-prev" style="margin-right: 4px;"><i class="fas fa-chevron-left"></i>
+        <button class="btn btn-qc btn-xs" id="quiz-prev"><i class="fas fa-chevron-right"></i>
+        </button>
+      </span>
+      <div class="dropdown pull-right">
+        <button class="btn btn-qc btn-xs dropdown-toggle" id="quiz-templ" style="margin-right: 8px;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">New</button>
+        <ul class="dropdown-menu dropdown-menu-right" id="templates-ul">
+',
+  paste0('<li><a href="#" data-num = "', seq_along(templ),'" id="template-li-', seq_along(templ),'" class="template-li">',templ,'</a></li>', collapse="\n"),
+'
+        </ul>
+      </div>
 
     </div>
     <div id="quiz-body" class="panel-body" style="height: 25em">
-      <div id="quizShowUI" class="shiny-html-output" >', quiz.set.admin.show.ui(qu, TRUE), '
+      <div id="quizShowUI" class="shiny-html-output" >', quiz.set.admin.show.ui(return.html = TRUE), '
       </div>
-      <div id="quizEditUI" class="shiny-html-output invisible">', quiz.set.edit.ui(qu, TRUE),'</div>
+      <div id="quizEditUI" class="shiny-html-output invisible">', quiz.set.edit.ui(return.html = TRUE),'</div>
       <div id="quizResultsUI" class="not-invisible">
         <div id="quiz-results-question" class="invisible"></div>
         <div id="quiz-results-plot" style="width:100%; height:14em; " class="highchart html-widget html-widget-output"></div>
@@ -157,14 +213,13 @@ quiz.admin.outer.ui = function(qu=app$glob$cur.qu, app=getApp()) {
   HTML(html)
 }
 
-quiz.set.admin.show.ui = function(qu, return.html=FALSE) {
+quiz.set.admin.show.ui = function(qu=app$glob$qu.edit, return.html=FALSE, app=getApp()) {
+  restore.point("quiz.set.admin.show.ui")
   if (is.null(qu)) return(NULL)
-  #btns = quiz.start.stop.btns()
   ui = qu$client.ui
   if (return.html) return(as.character(ui))
   setUI("quizShowUI", ui)
   dsetUI("quizShowUI", ui)
-  textInput("id","lab","txt")
 }
 
 quiz.start.stop.btns = function(quiz.runs = getApp()$glob$quiz.runs, as.html = FALSE) {
@@ -188,10 +243,31 @@ quiz.start.stop.btns = function(quiz.runs = getApp()$glob$quiz.runs, as.html = F
   HTML(html)
 }
 
-quiz.set.edit.ui = function(qu, return.html=FALSE) {
+quiz.set.edit.ui = function(qu=app$glob$qu.edit, return.html=FALSE, app=getApp()) {
   restore.point("quiz.edit.ui")
-  head = HTML(paste0('<textarea id="questionEdit" class="form-control question-edit">', qu$question,'</textarea>'))
-  answer = quizRadioButtons(choices=qu$choices, edit=TRUE)
+  head = HTML(paste0('<textarea id="questionEdit" class="form-control question-edit qu-edit">', qu$question,'</textarea>'))
+
+
+  # Choices
+
+  choices = qu$choices
+  rows = pmax(1,ceiling(nchar(choices)/65))
+  choices.html = paste0(
+    '<div class="radio" style="width: 100%">
+  <label class="choice-label-edit">
+    <input type="radio" class="choice-input" name="quiz-choices" value="',seq_along(choices),'">\n<span>',
+    '<textarea id="choiceEdit',seq_along(choices),'" class="form-control choice-edit qu-edit" rows="',rows,'">', choices,'</textarea>',       '</span>
+  </label>
+</div>', collapse="\n")
+  answer = HTML(paste0(
+    '<div id="quiz-answers-edit" style="width: 100%;" class="form-group shiny-input-radiogroup shiny-input-container shiny-bound-input">
+  <div class="shiny-options-group">
+',choices.html,'
+  </div>
+</div>'
+  ))
+
+
   btns = tagList(HTML('
   <button class="btn btn-qc btn-sm" id="btn-quiz-update">Update</button>
   '))

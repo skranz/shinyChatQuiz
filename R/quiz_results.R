@@ -13,7 +13,7 @@ sc:
   show.quiz.results(ans.df, qu)
 }
 
-show.quiz.results = function(ans.df=glob$ans.df, qu=glob$cur.qu, show.sol=FALSE, do.plot=TRUE, app=getApp(),glob=app$glob) {
+show.quiz.results = function(ans.df=glob$ans.df, qu=glob$qu.res, show.sol=FALSE, do.plot=TRUE, app=getApp(),glob=app$glob) {
   restore.point("show.quiz.results")
 
   choices = unlist(qu$choices)
@@ -93,9 +93,10 @@ choices.barplot = function(values, choices=names(counts), counts=NULL,col="#ff88
 }
 
 clicker.bar.color = function(right=NULL, choices=NULL, answer.ind=NULL) {
+  restore.point("clicker.bar.colors")
   if (is.null(right)) {
     right = rep(2, length(choices))
-    if (!is.null(answer.ind)) {
+    if (length(answer.ind)>0) {
       right = seq_along(choices) == answer.ind
     }
   }
