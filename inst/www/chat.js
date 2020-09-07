@@ -1,3 +1,7 @@
+function showResultsPlot(opts) {
+  var myChart = Highcharts.chart('quiz-results-plot',opts);
+}
+
 // Edit input leaves focus
 $(document).on("blur", ".qu-edit",function(e) {
   var obj = e.currentTarget;
@@ -100,12 +104,20 @@ $(document).on("click","#btn-quiz-start", function (e) {
 });
 
 
+
 $(document).on("click","#btn-quiz-send", function (e) {
   quizSendEvent();
 });
 
 function quizSendEvent() {
   var val = shinyEventsWidgetValue($("#quiz-choices"));
+
+  if (typeof val === 'undefined') {
+    val = "NA";
+    //$("#quiz-msgUI").html("Please first choose an answer by clicking on it.");
+    //return;
+  }
+
   Shiny.onInputChange("quizSendEvent", {eventId: "quizSendEvent", id: "quizSendEvent", value: val, nonce: Math.random()});
 }
 

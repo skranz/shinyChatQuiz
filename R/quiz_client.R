@@ -74,14 +74,18 @@ show.client.quiz.stop = function(app=getApp()) {
 
 show.client.quiz.send = function(choice, app=getApp()) {
   restore.point("show.client.quiz.send")
-  dsetUI("quiz-msgUI", HTML(paste0("You send answer no. ", choice,". You can update it until the quiz stops.")))
+  if (app$glob$lang == "de") {
+    dsetUI("quiz-msgUI", HTML(paste0("Danke für deine Antwort. Bis das Quiz stoppt kannst du sie auch noch ändern.")))
+  } else {
+    dsetUI("quiz-msgUI", HTML(paste0("Thanks for your answer. Changes are possible until the the quiz stops.")))
+  }
 }
 
 
 show.client.ui = function(app=getApp()) {
   ui = tagList(
     br(),
-    quiz.client.outer.ui(),
+    withMathJax(quiz.client.outer.ui()),
     chat.ui()
   )
   setUI("mainUI",ui)
@@ -91,6 +95,15 @@ show.client.ui = function(app=getApp()) {
 send.client.quiz.answer = function(value, idnum=app$idnum, app=getApp()) {
   restore.point("send.client.quiz.answer")
   choice = as.integer(value)
+  if (is.na(choice)) {
+    if (app$glob$lang == "de") {
+      dsetUI("quiz-msgUI", HTML(paste0("Bitte wähle eine Antwort.")))
+    } else {
+      dsetUI("quiz-msgUI", HTML(paste0("Please choose an answer.")))
+    }
+    return()
+  }
+
   glob=app$glob
   idnum = app$idnum
   adapt.glob.ans.df(idnum)

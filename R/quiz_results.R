@@ -29,7 +29,7 @@ show.quiz.results = function(ans.df=glob$ans.df, qu=glob$qu.res, show.sol=FALSE,
 
   glob$results.plot = glob$results.table = NULL
 
-  setInnerHTML("quiz-results-question", qu$question.html)
+  setInnerHTML("quiz-results-question", paste0(qu$question,"\n<script>if (window.MathJax) MathJax.Hub.Queue([\"Typeset\", MathJax.Hub]);</script>"))
   set.visible("#quiz-results-question")
 
   if (do.plot) {
@@ -40,8 +40,8 @@ show.quiz.results = function(ans.df=glob$ans.df, qu=glob$qu.res, show.sol=FALSE,
     plot = choices.barplot(values=choices[ans.df$choice], choices, answer.ind=qu$answer.ind, choice.labels=choice.labels)
     glob$results.plot = plot
     set.visible("#quiz-results-plot")
-    app$session$output[["quiz-results-plot"]] = renderHighchart(plot)
-    #app$session$output[["test-plot"]] = renderHighchart(plot)
+    opts = plot$x$hc_opts
+    callJS("showResultsPlot",opts)
     # show a table
   } else {
     n = length(choices)

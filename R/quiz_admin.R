@@ -23,12 +23,17 @@ show.admin.ui = function(app=getApp()) {
   # Note that quizResultsUI must be initially visible
   # but can be hidden now. Otherwise highcharter plots
   # are not correctly shown
-  callJS("showQuizPane","quizShow")
+  callJS("showQuizPane","quizEdit")
 }
 
 init.admin.handlers = function(app=getApp()) {
   glob = app$glob
 
+  buttonHandler("quiz-refresh-btn",fun=function(..., app=getApp()) {
+    glob=app$glob
+    glob$qu.res = glob$qu.run
+    show.quiz.results()
+  })
   eventHandler("qu-edit-blur",fun = quiz.edit.blur.handler)
 
 
@@ -181,13 +186,16 @@ quiz.admin.outer.ui = function(app=getApp()) {
 
     </div>
     <div id="quiz-body" class="panel-body" style="height: 25em">
-      <div id="quizShowUI" class="shiny-html-output" >', quiz.set.admin.show.ui(return.html = TRUE), '
+      <div id="quizShowUI" class="shiny-html-output invisible" >', quiz.set.admin.show.ui(return.html = TRUE), '
       </div>
-      <div id="quizEditUI" class="shiny-html-output invisible">', quiz.set.edit.ui(return.html = TRUE),'</div>
-      <div id="quizResultsUI" class="not-invisible">
-        <div id="quiz-results-question" class="invisible"></div>
-        <div id="quiz-results-plot" style="width:100%; height:14em; " class="highchart html-widget html-widget-output"></div>
-        <div id="quiz-results-table" style="width:100%; height:14em;" class="highchart html-widget html-widget-output invisible"></div>
+      <div id="quizEditUI" class="shiny-html-output">', quiz.set.edit.ui(return.html = TRUE),'</div>
+      <div id="quizResultsUI" class="invisible">
+        <div>
+        <button class="btn btn-xs" id="quiz-refresh-btn"><i class="fas fa-sync"></i></button>
+        <span id="quiz-results-question" class="invisible"></span>
+        </div>
+        <div id="quiz-results-plot" style="width:100%; height:14em;" class="invisible"></div>
+        <div id="quiz-results-table" style="width:100%; height:14em;" class="invisible"></div>
       </div>
     </div>
   <div class="panel-footer">

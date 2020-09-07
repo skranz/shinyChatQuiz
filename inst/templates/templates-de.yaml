@@ -1,18 +1,18 @@
 "AB":
-  question: Wählen Sie die richtige Antwort.
+  question: Wähle die richtige Antwort.
   sc:
     - A
     - B
 
 "ABC":
-  question: Wählen Sie die richtige Antwort.
+  question: Wähle die richtige Antwort.
   sc:
     - A
     - B
     - C
 
 "ABCD":
-  question: Wählen Sie die richtige Antwort.
+  question: Wähle die richtige Antwort.
   sc:
     - A
     - B
