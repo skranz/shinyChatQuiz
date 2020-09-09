@@ -93,6 +93,7 @@ nick.names.list = function() {
     "wonderful",
     "xenodochial",
     "youthful",
+    "yearning",
     "zealous",
     "zen"
   )

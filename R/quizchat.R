@@ -2,8 +2,8 @@
 quizchat.example = function() {
   restore.point.options(display.restore.point = TRUE)
   library(shinyEvents)
-  app = quizChatApp(lang="de")
-  viewQuizChat(app,roles=c("client", "admin"))
+  app = quizChatApp(lang="de", login.explain = "Sie können Ihren echten Namen oder ein Pseudonym eintragen. Beachten Sie, dass die Vorlesung aufgezeichnet wird und dabei auch Chatnachrichten zu sehen sind.", save.dir="C:/libraries/shinyChatQuiz/saved_qu")
+  viewQuizChat(app,roles=c("client","admin"))
 }
 
 viewQuizChat = function(app, roles=c("client","admin")) {
@@ -17,12 +17,15 @@ viewQuizChat = function(app, roles=c("client","admin")) {
   viewApp(app,launch.browser = launch.admin.client)
 }
 
-quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.login = FALSE) {
+quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.login = FALSE, login.explain="", save.dir=NULL) {
   restore.point("quizChatApp")
   app = eventsApp()
   glob = app$glob
+  glob$title = title
   glob$admin.password = admin.password
   glob$auto.login = auto.login
+  glob$login.explain = login.explain
+  glob$save.dir = save.dir
   init.qc.globals(app, lang=lang)
   app$ui = fluidPage(title = title,
     quizchat.headers(),
@@ -31,19 +34,26 @@ quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.lo
   appInitHandler(function(session,..., app) {
     observe(priority = -100,x = {
       cat("\nobserve query string once")
-      query <- parseQueryString(session$clientData$url_search)
-      if (isTRUE(query$role=="admin")) {
-        init.admin.app.instance()
+      glob=app$glob
+      glob$app.counter = glob$app.counter+1
+      app$idnum = glob$app.counter
 
-        # # For testing purposes
-        # glob = app$glob
-        # start.quiz()
-        # send.client.quiz.answer(1,idnum=1)
-        # stop.quiz()
+      query <- parseQueryString(session$clientData$url_search)
+
+
+      if (isTRUE(query$role=="admin")) {
+        if (auto.login) {
+          init.admin.app.instance()
+        } else {
+          set.admin.login.ui()
+        }
       } else {
-        init.client.app.instance()
+        if (auto.login) {
+          init.client.app.instance()
+        } else {
+          set.client.login.ui()
+        }
       }
-      insert.newest.chat.entries()
     })
 
   })
@@ -56,6 +66,7 @@ init.qc.globals = function(app, n=100, push.msg=TRUE, push.past.secs=30, lang="d
 
   set.default.templates()
 
+  glob$qu.li = list()
   glob$app.counter = 0
   glob$qu.run = NULL
   glob$num.send = glob$num.resend = 0
@@ -106,6 +117,3 @@ quizchat.headers = function() {
     tags$script(src="shinyChatQuiz/chat.js")
   )
 }
-
-
-

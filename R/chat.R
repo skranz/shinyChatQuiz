@@ -47,29 +47,9 @@ initials.colors = function() {
   c("#8DD3C7", "#FFFFB3", "#BEBADA", "#FB8072", "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5", "#D9D9D9", "#BC80BD", "#CCEBC5", "#FFED6F", "#7FC97F", "#BEAED4", "#FDC086", "#FFFF99", "#386CB0", "#F0027F", "#BF5B17", "#666666", "#FBB4AE", "#B3CDE3", "#CCEBC5", "#DECBE4", "#FED9A6", "#FFFFCC", "#E5D8BD", "#FDDAEC", "#F2F2F2", "#B3E2CD", "#FDCDAC", "#CBD5E8", "#F4CAE4", "#E6F5C9", "#FFF2AE", "#F1E2CC", "#CCCCCC")
 }
 
-chat.ui.alternative = function() {
-  html = '
-<div class="col-md-6">
-  Chat
-  <div id="chat-body" class="chat-body-style" style="height: 20em;">
-    <ul id="chat-ul" class="chat">
-    </ul>
-  </div>
-  <div class="input-group">
-    <input id="chat-input" type="text" class="form-control input-sm" placeholder="Type your message here..." />
-    <span class="input-group-btn">
-        <button class="btn btn-qc btn-sm" id="btn-chat-send">
-            Send</button>
-    </span>
-  </div>
-</div>
-'
-  HTML(html)
-}
 
-
-chat.ui = function() {
-   html = '<div id="chat-outer" class="col-md-5">
+chat.ui = function(user=app$user, show.username=TRUE, change.user.btn = TRUE, app=getApp()) {
+   html = paste0('<div id="chat-outer" class="col-md-5">
     <div class="panel panel-primary">
         <div class="panel-heading">
 
@@ -79,8 +59,8 @@ chat.ui = function() {
        style="margin-left: 2em;">Raise Hand</button>
               <button class="btn btn-qc btn-xs" id="btn-lower-hand"
        style="margin-left: 5px; margin-right: 5px;">Lower Hand</button>
-            <span>
-
+            </span>
+            ' , if (show.username) paste0('<span id="chat-user-header" class="pull-right">',user,'</span>'),'
         </div>
         <div id="chat-body" class="panel-body" style="height: 20em">
             <ul id="chat-ul" class="chat">
@@ -96,8 +76,12 @@ chat.ui = function() {
             </div>
         </div>
     </div>
-</div>'
+', if (change.user.btn) '<button id="changeUserBtn" style="" type="button" class="btn btn-default action-button ">Nutzernamen ändern</button>',
+'</div>')
 
+   if (change.user.btn) {
+     buttonHandler("changeUserBtn",change.user.name)
+   }
    HTML(html)
 }
 
@@ -172,6 +156,36 @@ insert.chat.entry = function(msg="message", user="user",initials="U", time=forma
   restore.point("insert.chat")
   callJS("insertChat", .args=list(msg=msg, user=user, initials=initials, time=time, color=color))
 }
+
+
+change.user.name = function(..., app=getApp()) {
+  input.lab = if (lang=="de") "Neuer Nutzername" else "New username"
+  showModal(modalDialog(footer=NULL, easyClose=TRUE,
+    textInput("userInput",input.lab, app$user),
+    simpleButton("newUserOkBtn","Ok", form.ids = c("userInput")),
+    simpleButton("newUserCancelBtn","Cancel"),
+  ))
+  buttonHandler("newUserOkBtn", function(formValues,..., app=getApp()) {
+    args = list(...)
+    restore.point("loginClick")
+    user = formValues$userInput
+    if (nchar(trimws(user))==0) {
+      removeModal()
+      return()
+    }
+    app$user = user
+    app$initials = make.initials(user)
+    app$msg.entry["user"] = user
+    app$msg.entry["initials"] = app$initials
+    setInnerHTML("chat-user-header", user)
+    removeModal()
+  })
+  buttonHandler("newUserCancelBtn", function(...,app=getApp()) {
+    removeModal()
+  })
+}
+
+
 
 
 

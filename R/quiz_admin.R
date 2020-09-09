@@ -1,22 +1,26 @@
 
-init.admin.app.instance = function(app=getApp()) {
+init.admin.app.instance = function(user=random.nickname(sep=" "),app=getApp()) {
   glob=app$glob
-  glob$app.counter = glob$app.counter+1
-  app$idnum = glob$app.counter
-  app$user = random.nickname(sep=" ")
+
+  app$user = user
   app$initials = make.initials(app$user)
   init.chat.app.instance(app)
   init.admin.handlers()
   set.edit.quiz(app$glob$templates[[1]],update.forms = FALSE)
+
   show.admin.ui()
+  insert.newest.chat.entries()
+
 }
+
+
 
 
 show.admin.ui = function(app=getApp()) {
   ui = tagList(
     br(),icon(""),
     quiz.admin.outer.ui(),
-    chat.ui()
+    chat.ui(show.username=FALSE)
   )
   setUI("mainUI",ui)
 
@@ -29,6 +33,7 @@ show.admin.ui = function(app=getApp()) {
 init.admin.handlers = function(app=getApp()) {
   glob = app$glob
 
+
   buttonHandler("quiz-refresh-btn",fun=function(..., app=getApp()) {
     glob=app$glob
     glob$qu.res = glob$qu.run
@@ -40,9 +45,25 @@ init.admin.handlers = function(app=getApp()) {
   classEventHandler("template-li",event="click", fun = function(data, ..., app=getApp()) {
     restore.point("template-li click")
     templ.num = data$num
-    cat("Template li click!\n\n")
     set.edit.quiz(glob$templates[[templ.num]])
     callJS("showQuizPane","quizEdit")
+  })
+
+  buttonHandler("quiz-prev-btn", fun = function(..., app=getApp(), glob=app$glob) {
+    restore.point("quiz-prev-btn-click")
+    if (isTRUE(glob$qu.li.ind > 0)) {
+      glob$qu.li.ind = max(1,glob$qu.li.ind-1)
+      set.edit.quiz(glob$qu.li[[glob$qu.li.ind]])
+      callJS("showQuizPane","quizEdit")
+    }
+  })
+  buttonHandler("quiz-next-btn", fun = function(..., app=getApp(), glob=app$glob) {
+    if (isTRUE(length(glob$qu.li) >0 &
+               glob$qu.li.ind < length(glob$qu.li))) {
+      glob$qu.li.ind = glob$qu.li.ind+1
+      set.edit.quiz(glob$qu.li[[glob$qu.li.ind]])
+      callJS("showQuizPane","quizEdit")
+    }
   })
 
   eventHandler("quizStartEvent",fun =  function(value, ..., app=getApp()) {
@@ -100,6 +121,17 @@ set.edit.quiz = function(qu, app=getApp(), update.forms=TRUE) {
   #glob$quiz.runs = FALSE
 }
 
+add.to.qu.li = function(qu, app=getApp(), glob=app$glob) {
+  n = length(glob$qu.li)
+  if (n==0) {
+    glob$qu.li[[1]] = qu
+  } else {
+    prev.qu = glob$qu.li[[n]]
+    if (identical(prev.qu$choices,qu$choices) & identical(prev.qu$question, qu$question))
+      return()
+    glob$qu.li[[n+1]] = qu
+  }
+}
 
 start.quiz = function(timer=NA,app=getApp()) {
   restore.point("start.quiz")
@@ -110,6 +142,10 @@ start.quiz = function(timer=NA,app=getApp()) {
     return(NULL)
   }
   glob$qu.run = qu
+
+  add.to.qu.li(qu)
+  glob$qu.li.ind = length(glob$qu.li)
+
   if (is.null(glob$ans.df)) {
     n = max(50, round(glob$app.counter*1.1))
     glob$ans.df = data.frame(idnum=1:n, choice = NA_integer_)
@@ -150,6 +186,23 @@ stop.quiz = function(app=getApp()) {
   callJS("stopQuizTimer")
   callJS("setQuizResultsPane")
   show.quiz.results()
+  save.qu.res()
+}
+
+# Save stopped quiz and results
+save.qu.res = function(app=getApp(), glob=app$glob) {
+  restore.point("save.qu.res")
+  if (is.null(glob$save.dir)) return()
+  if (is.null(glob$res.qu$file_id)) {
+    file_id = format(Sys.time(),"%Y-%m-%d_%H_%M_%S")
+    glob$qu.res$file_id = file_id
+  } else {
+    file_id = glob$qu.res$file_id
+  }
+  try({
+    saveRDS(glob$qu.res, paste0(glob$save.dir,"/qu_",file_id,".Rds"))
+    saveRDS(glob$ans.df[seq_along(glob$app.counter),,drop=FALSE], paste0(glob$save.dir,"/ans_",file_id,".Rds"))
+  })
 }
 
 
@@ -170,9 +223,8 @@ quiz.admin.outer.ui = function(app=getApp()) {
       <button class="btn btn-qc btn-xs quiz-tab-btn" id="quizResultsBtn"
      style="">Results</button>
       <span class="pull-right">
-
-        <button class="btn btn-qc btn-xs" id="quiz-prev" style="margin-right: 4px;"><i class="fas fa-chevron-left"></i>
-        <button class="btn btn-qc btn-xs" id="quiz-prev"><i class="fas fa-chevron-right"></i>
+        <button class="btn btn-qc btn-xs" id="quiz-prev-btn" style="margin-right: 4px;"><i class="fas fa-chevron-left"></i>
+        <button class="btn btn-qc btn-xs" id="quiz-next-btn"><i class="fas fa-chevron-right"></i>
         </button>
       </span>
       <div class="dropdown pull-right">

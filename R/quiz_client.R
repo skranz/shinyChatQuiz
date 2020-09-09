@@ -1,10 +1,8 @@
 
-init.client.app.instance = function(app=getApp()) {
+init.client.app.instance = function(user=random.nickname(sep=" "),app=getApp()) {
 
   glob=app$glob
-  glob$app.counter = glob$app.counter+1
-  app$idnum = glob$app.counter
-  app$user = random.nickname(sep=" ")
+  app$user = user
   app$initials = make.initials(app$user)
 
   init.chat.app.instance(app)
@@ -34,6 +32,8 @@ init.client.app.instance = function(app=getApp()) {
   eventHandler("quizSendEvent",fun =  function(value, ..., app=getApp()) {
     send.client.quiz.answer(value,app=app)
   })
+  insert.newest.chat.entries()
+
 }
 
 client.quiz.start = function(app=getApp()) {
@@ -51,8 +51,10 @@ client.quiz.start = function(app=getApp()) {
 }
 
 set.client.quiz.timer = function(timer = glob$timer, app=getApp(), glob=app$glob) {
+  restore.point("set.client.quiz.timer")
   if (is.na(timer)) {
-    setInnerHTML("quiz-timer","")
+    callJS("stopQuizTimer")
+    setInnerHTML("quiz-time","")
   } else {
     callJS("startQuizCountdown", timer)
   }
@@ -82,7 +84,7 @@ show.client.quiz.send = function(choice, app=getApp()) {
 }
 
 
-show.client.ui = function(app=getApp()) {
+show.client.ui = function(app=getApp(), lang=app$glob$lang) {
   ui = tagList(
     br(),
     withMathJax(quiz.client.outer.ui()),
