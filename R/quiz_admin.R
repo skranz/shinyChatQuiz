@@ -2,6 +2,7 @@
 init.admin.app.instance = function(user=random.nickname(sep=" "),app=getApp()) {
   glob=app$glob
 
+  app$is.admin = TRUE
   app$user = user
   app$initials = make.initials(app$user)
   init.chat.app.instance(app)
@@ -9,7 +10,7 @@ init.admin.app.instance = function(user=random.nickname(sep=" "),app=getApp()) {
   set.edit.quiz(app$glob$templates[[1]],update.forms = FALSE)
 
   show.admin.ui()
-  insert.newest.chat.entries()
+  update.app.cookie()
 
 }
 
@@ -18,6 +19,7 @@ init.admin.app.instance = function(user=random.nickname(sep=" "),app=getApp()) {
 
 show.admin.ui = function(app=getApp()) {
   ui = tagList(
+    htmlwidgets::getDependency("highchart","highcharter"),
     br(),icon(""),
     quiz.admin.outer.ui(),
     chat.ui(show.username=FALSE)
@@ -331,6 +333,7 @@ quiz.set.edit.ui = function(qu=app$glob$qu.edit, return.html=FALSE, app=getApp()
   btns = tagList(HTML('
   <button class="btn btn-qc btn-sm" id="btn-quiz-update">Update</button>
   '))
+  btns = NULL
   ui = tagList(head,answer, btns)
   if (return.html) return(as.character(ui))
   setUI("quizEditUI", ui)

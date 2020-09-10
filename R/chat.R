@@ -48,7 +48,7 @@ initials.colors = function() {
 }
 
 
-chat.ui = function(user=app$user, show.username=TRUE, change.user.btn = TRUE, app=getApp()) {
+chat.ui = function(user=app$user, is.admin=app$is.admin, show.username=TRUE, change.user.btn = TRUE, app=getApp()) {
    html = paste0('<div id="chat-outer" class="col-md-5">
     <div class="panel panel-primary">
         <div class="panel-heading">
@@ -64,6 +64,7 @@ chat.ui = function(user=app$user, show.username=TRUE, change.user.btn = TRUE, ap
         </div>
         <div id="chat-body" class="panel-body" style="height: 20em">
             <ul id="chat-ul" class="chat">
+              ',inner.chat.entries(max.entries = if(is.admin) 500 else 10),'
             </ul>
         </div>
         <div class="panel-footer">
@@ -83,6 +84,28 @@ chat.ui = function(user=app$user, show.username=TRUE, change.user.btn = TRUE, ap
      buttonHandler("changeUserBtn",change.user.name)
    }
    HTML(html)
+}
+
+inner.chat.entries = function(max.entries=20, app=getApp()) {
+  restore.point("inner.chat.entries")
+  glob = app$glob
+  n = glob$msg.counter
+  if (n < 1) return(NULL)
+  rows = max(1,(n-max.entries)+1):n
+  msg.mat = glob$msg.mat
+
+
+  paste0(collapse="\n",'<li class="left clearfix">
+    <span class="circle pull-left" style="background-color: ',msg.mat[rows,"color"],';"><span class="initials">',msg.mat[rows,"initials"],'</span></span>
+    <div class="chat-body clearfix">
+    <div class="header">
+    <strong class="primary-font">',msg.mat[rows,"user"],'</strong> <small class="pull-right text-muted">
+    <span class="glyphicon glyphicon-time"></span>',msg.mat[rows,"time"],'</small>
+    </div>
+    <p>',msg.mat[rows,"msg"],'</p>
+    </div>
+    </li>
+  ')
 }
 
 add.raise.hand.entry = function(...,app=getApp(), glob=app$glob) {
@@ -126,13 +149,13 @@ add.chat.entry = function(msg="message", app=getApp()) {
 }
 
 insert.newest.chat.entries = function(app=getApp()) {
-  restore.point("insert.newest.chat.entries")
+  #restore.point("insert.newest.chat.entries")
 
   glob = app$glob
-  if (app$msg.counter >= glob$msg.counter)
+  if (isTRUE(app$msg.counter >= glob$msg.counter))
     return()
   rows = (app$msg.counter+1):glob$msg.counter
-  restore.point("insert.newest.chat.entries2")
+  #restore.point("insert.newest.chat.entries2")
 
   for (row in rows) {
     callJS("insertChat", .args=as.list(glob$msg.mat[row,-1]))
@@ -178,6 +201,7 @@ change.user.name = function(..., app=getApp()) {
     app$msg.entry["user"] = user
     app$msg.entry["initials"] = app$initials
     setInnerHTML("chat-user-header", user)
+    update.app.cookie()
     removeModal()
   })
   buttonHandler("newUserCancelBtn", function(...,app=getApp()) {

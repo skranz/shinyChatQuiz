@@ -2,8 +2,8 @@
 quizchat.example = function() {
   restore.point.options(display.restore.point = TRUE)
   library(shinyEvents)
-  app = quizChatApp(lang="de", login.explain = "Sie können Ihren echten Namen oder ein Pseudonym eintragen. Beachten Sie, dass die Vorlesung aufgezeichnet wird und dabei auch Chatnachrichten zu sehen sind.", save.dir="C:/libraries/shinyChatQuiz/saved_qu")
-  viewQuizChat(app,roles=c("client","admin"))
+  app = quizChatApp(lang="de", login.explain = "Sie können Ihren echten Namen oder ein Pseudonym eintragen. Beachten Sie, dass die Vorlesung aufgezeichnet wird und dabei auch Chatnachrichten zu sehen sind.", save.dir="C:/libraries/shinyChatQuiz/saved_qu", admin.password = "test2")
+  viewQuizChat(app,roles=c("client", "admin"))
 }
 
 viewQuizChat = function(app, roles=c("client","admin")) {
@@ -17,12 +17,17 @@ viewQuizChat = function(app, roles=c("client","admin")) {
   viewApp(app,launch.browser = launch.admin.client)
 }
 
-quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.login = FALSE, login.explain="", save.dir=NULL) {
+quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.login = FALSE, login.explain="", save.dir=NULL, app.id = "qc", perma.cookie.days =365) {
   restore.point("quizChatApp")
   app = eventsApp()
   glob = app$glob
+  glob$admin.cookie.id = paste0("quiz-chat-",app.id,"-admin")
+  glob$client.cookie.id = paste0("quiz-chat-",app.id,"-client")
+  glob$perma.cookie.days = perma.cookie.days
+  glob$app.id = app.id
   glob$title = title
   glob$admin.password = admin.password
+  glob$pwhash = digest(glob$admin.password, algo="sha256")
   glob$auto.login = auto.login
   glob$login.explain = login.explain
   glob$save.dir = save.dir
@@ -31,33 +36,46 @@ quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.lo
     quizchat.headers(),
     uiOutput("mainUI")
   )
+
+  loadPageCookiesHandler(fun= function(cookies,...) {
+    init.qc.app(cookies)
+  })
+
   appInitHandler(function(session,..., app) {
-    observe(priority = -100,x = {
-      cat("\nobserve query string once")
-      glob=app$glob
-      glob$app.counter = glob$app.counter+1
-      app$idnum = glob$app.counter
-
-      query <- parseQueryString(session$clientData$url_search)
-
-
-      if (isTRUE(query$role=="admin")) {
-        if (auto.login) {
-          init.admin.app.instance()
-        } else {
-          set.admin.login.ui()
-        }
-      } else {
-        if (auto.login) {
-          init.client.app.instance()
-        } else {
-          set.client.login.ui()
-        }
-      }
-    })
-
+    # Initialization takes place in
+    # loadPageCookisHandler
   })
   app
+}
+
+init.qc.app = function(cookies, app=getApp()) {
+  query <- parseQueryString(app$session$clientData$url_search)
+  cat("query: ", app$session$clientData$url_search)
+  restore.point("init.qc.app")
+
+  glob=app$glob
+  glob$app.counter = glob$app.counter+1
+  app$idnum = glob$app.counter
+  if (isTRUE(query$role=="admin")) {
+    app$cookie.id = glob$admin.cookie.id
+    cookie = cookies[[app$cookie.id]]
+    pw.ok = is.null(glob$admin.password) | identical(glob$pwhash, cookie$pwhash)
+    if (!is.null(cookie) & pw.ok) {
+      app$perma.cookie = cookie$perma
+      init.admin.app.instance(cookie$user)
+    } else {
+      set.admin.login.ui()
+    }
+  } else {
+    app$cookie.id = glob$client.cookie.id
+    cookie = cookies[[app$cookie.id]]
+    if (!is.null(cookie)) {
+      app$perma.cookie = cookie$perma
+      init.client.app.instance(cookie$user)
+    } else {
+      set.client.login.ui()
+    }
+  }
 }
 
 init.qc.globals = function(app, n=100, push.msg=TRUE, push.past.secs=30, lang="de") {
@@ -106,14 +124,24 @@ adapt.glob.ans.df = function(idnum, app=getApp()) {
 
 
 #' Add push.js.headers. Add this call to your ui
-quizchat.headers = function() {
+quizchat.headers = function(glob=getApp()$glob) {
 
   dir = system.file("www", package="shinyChatQuiz")
   addResourcePath("shinyChatQuiz",dir)
   tagList(
-    htmlwidgets::getDependency("highchart","highcharter"),
     push.js.headers(),
     tags$link(href="shinyChatQuiz/chat.css", rel="stylesheet"),
-    tags$script(src="shinyChatQuiz/chat.js")
+    tags$script(src="shinyChatQuiz/chat.js"),
+    cookiesHeader(onload.cookies = paste0("quiz-chat-",glob$app.id,c("-client","-admin")))
+
   )
+}
+
+update.app.cookie = function(app=getApp()) {
+  glob = app$glob
+  cookie = list(user=app$user, perma=app$perma.cookie)
+  if (app$is.admin) {
+    cookie$pwhash = glob$pwhash
+  }
+  setCookie(app$cookie.id, values = cookie,expires = if (cookie$perma) glob$perma.cookie.days else NULL)
 }

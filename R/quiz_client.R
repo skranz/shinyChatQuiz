@@ -2,6 +2,7 @@
 init.client.app.instance = function(user=random.nickname(sep=" "),app=getApp()) {
 
   glob=app$glob
+  app$is.admin = FALSE
   app$user = user
   app$initials = make.initials(app$user)
 
@@ -32,8 +33,7 @@ init.client.app.instance = function(user=random.nickname(sep=" "),app=getApp()) 
   eventHandler("quizSendEvent",fun =  function(value, ..., app=getApp()) {
     send.client.quiz.answer(value,app=app)
   })
-  insert.newest.chat.entries()
-
+  update.app.cookie()
 }
 
 client.quiz.start = function(app=getApp()) {
