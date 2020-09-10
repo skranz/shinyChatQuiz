@@ -73,6 +73,7 @@ init.admin.handlers = function(app=getApp()) {
     restore.point("quizAddRemoveChoice-add")
     qu = glob$qu.edit
     qu$choices = c(glob$qu.edit$choices,"")
+    qu$client.ui = quiz.client.ui(qu)
     set.edit.quiz(qu)
   })
 
@@ -83,6 +84,7 @@ init.admin.handlers = function(app=getApp()) {
     if (is.na(choice)) return()
     qu = glob$qu.edit
     qu$choices = qu$choices[-choice]
+    qu$client.ui = quiz.client.ui(qu)
     set.edit.quiz(qu)
   })
 

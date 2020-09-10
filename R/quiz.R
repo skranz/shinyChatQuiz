@@ -79,7 +79,7 @@ init.quiz = function(qu) {
     }
   }
   qu$question.html = md2html(qu$question)
-  qu$ui = quiz.ui(qu)
+  #qu$ui = quiz.ui(qu)
   qu$client.ui = quiz.client.ui(qu)
   qu
 }
