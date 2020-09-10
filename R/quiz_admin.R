@@ -20,6 +20,7 @@ init.admin.app.instance = function(user=random.nickname(sep=" "),app=getApp()) {
 show.admin.ui = function(app=getApp()) {
   ui = tagList(
     htmlwidgets::getDependency("highchart","highcharter"),
+    #tags$script(src="shinyChatQuiz/admin.js"),
     br(),icon(""),
     quiz.admin.outer.ui(),
     chat.ui(show.username=FALSE)
@@ -67,6 +68,24 @@ init.admin.handlers = function(app=getApp()) {
       callJS("showQuizPane","quizEdit")
     }
   })
+
+  eventHandler("quizAddRemoveChoice",id = "add-choice", fun =  function(value, ..., app=getApp()) {
+    restore.point("quizAddRemoveChoice-add")
+    qu = glob$qu.edit
+    qu$choices = c(glob$qu.edit$choices,"")
+    set.edit.quiz(qu)
+  })
+
+  eventHandler("quizAddRemoveChoice",id = "del-choice", fun =  function(value, ..., app=getApp()) {
+    args = list(...)
+    restore.point("quizAddRemoveChoice-del")
+    choice = as.integer(value)
+    if (is.na(choice)) return()
+    qu = glob$qu.edit
+    qu$choices = qu$choices[-choice]
+    set.edit.quiz(qu)
+  })
+
 
   eventHandler("quizStartEvent",fun =  function(value, ..., app=getApp()) {
     start.quiz(timer=as.integer(value))
@@ -169,6 +188,7 @@ start.quiz = function(timer=NA,app=getApp()) {
 admin.set.quiz.timer = function(timer, app=getApp()) {
   glob = app$glob
   if (!glob$quiz.runs) return()
+  glob$timer.start.time = as.integer(Sys.time())
   glob$timer = timer
   if (is.na(timer)) {
     callJS("startQuizRunTime");
@@ -316,16 +336,19 @@ quiz.set.edit.ui = function(qu=app$glob$qu.edit, return.html=FALSE, app=getApp()
   rows = pmax(1,ceiling(nchar(choices)/65))
   choices.html = paste0(
     '<div class="radio" style="width: 100%">
-  <label class="choice-label-edit">
-    <input type="radio" class="choice-input" name="quiz-choices" value="',seq_along(choices),'">\n<span>',
+  <label class="choice-label-edit">',
+    '<input type="radio" class="choice-input" name="quiz-answers-edit" value="',seq_along(choices),'">\n<span>',
     '<textarea id="choiceEdit',seq_along(choices),'" class="form-control choice-edit qu-edit" rows="',rows,'">', choices,'</textarea>',       '</span>
   </label>
 </div>', collapse="\n")
+
   answer = HTML(paste0(
     '<div id="quiz-answers-edit" style="width: 100%;" class="form-group shiny-input-radiogroup shiny-input-container shiny-bound-input">
   <div class="shiny-options-group">
 ',choices.html,'
   </div>
+  <button class="btn btn-secondary btn-xs" id="btn-quiz-add-choice" style="margin-left: 20px">Add choice</button>
+  <button class="btn btn-secondary btn-xs" id="btn-quiz-del-choice">Remove choice</button>
 </div>'
   ))
 

@@ -33,6 +33,7 @@ init.client.app.instance = function(user=random.nickname(sep=" "),app=getApp()) 
   eventHandler("quizSendEvent",fun =  function(value, ..., app=getApp()) {
     send.client.quiz.answer(value,app=app)
   })
+  set.client.quiz.timer()
   update.app.cookie()
 }
 
@@ -50,12 +51,14 @@ client.quiz.start = function(app=getApp()) {
   set.client.quiz.timer()
 }
 
-set.client.quiz.timer = function(timer = glob$timer, app=getApp(), glob=app$glob) {
+set.client.quiz.timer = function(app=getApp(), glob=app$glob) {
   restore.point("set.client.quiz.timer")
+  timer = glob$timer
   if (is.na(timer)) {
     callJS("stopQuizTimer")
     setInnerHTML("quiz-time","")
   } else {
+    timer = timer - round(as.integer(Sys.time())-glob$timer.start.time)
     callJS("startQuizCountdown", timer)
   }
 }

@@ -101,6 +101,9 @@ init.qc.globals = function(app, n=100, push.msg=TRUE, push.past.secs=30, lang="d
   glob$rv.stop.nonce <- reactiveVal(0)
   glob$rv.timer.change.nonce <- reactiveVal(0)
 
+  glob$timer.start.time = NA
+  glob$timer = NA
+
   glob$msg.time = rep(0L,n)
   glob$msg.mat = matrix("",nrow=n, ncol=6)
 
@@ -128,13 +131,13 @@ quizchat.headers = function(glob=getApp()$glob) {
 
   dir = system.file("www", package="shinyChatQuiz")
   addResourcePath("shinyChatQuiz",dir)
-  tagList(
+  tagList(tags$head(
     push.js.headers(),
     tags$link(href="shinyChatQuiz/chat.css", rel="stylesheet"),
     tags$script(src="shinyChatQuiz/chat.js"),
+    tags$script(src="shinyChatQuiz/admin.js"),
     cookiesHeader(onload.cookies = paste0("quiz-chat-",glob$app.id,c("-client","-admin")))
-
-  )
+  ))
 }
 
 update.app.cookie = function(app=getApp()) {
