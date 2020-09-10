@@ -8,5 +8,5 @@ Description: App for online lecture support with chat and quizzes
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Depends: shinyEvents, restorepoint, shinyEventsPushMessage, rmdtools,
-         yaml, highcharter, digest
+Depends: shinyEvents, shinyEventsPushMessage, rmdtools,
+         restorepoint, yaml, highcharter, digest

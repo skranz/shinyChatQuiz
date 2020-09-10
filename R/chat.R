@@ -31,7 +31,6 @@ init.chat.app.instance = function(app) {
   color = glob$colors[ (app$idnum-1 %% length(glob$colors))+1 ]
   app$msg.entry = c(idnum=as.character(app$idnum), msg="", user=app$user, initials=app$initials,time="", color=color)
 
-  app$push.msg = glob$push.msg
   app$push.past.secs = glob$push.past.secs
 
   observeEvent(glob$rv.msg.counter(), {
@@ -160,18 +159,23 @@ insert.newest.chat.entries = function(app=getApp()) {
   for (row in rows) {
     callJS("insertChat", .args=as.list(glob$msg.mat[row,-1]))
   }
+  app$msg.counter = glob$msg.counter
 
   # push new messages that are not older than app$push.past.secs
-  if (app$push.msg) {
-    time = as.numeric(Sys.time())
-    past.secs = time-glob$msg.time[rows]
+  if (isTRUE(glob$push.msg & app$is.admin)) {
+    # Only push recent messages if some are not by yourself
+    from.somebody.else = any(glob$msg.mat[rows,"idnum"] != as.character(app$idnum))
+    if (!from.somebody.else) return()
+
+    time = as.integer(Sys.time())
+    past.secs = time-as.integer(glob$msg.time[1:glob$msg.counter])
     use = which(past.secs <= app$push.past.secs)
-    restore.point("push.messages...")
     if (length(use)>0) {
-      push.message(paste0(glob$msg.mat[rows[use],"initials"],": ", glob$msg.mat[rows[use],"msg"],collapse="\n---\n"))
+      if (length(use)>3) use = use[(length(use)-2):length(use)]
+      restore.point("push.messages...")
+      push.message(paste0(glob$msg.mat[use,"initials"],": ", glob$msg.mat[use,"msg"],collapse="\n---\n"))
     }
   }
-  app$msg.counter = glob$msg.counter
 }
 
 
