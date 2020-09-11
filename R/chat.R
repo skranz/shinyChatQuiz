@@ -48,18 +48,21 @@ initials.colors = function() {
 
 
 chat.ui = function(user=app$user, is.admin=app$is.admin, show.username=TRUE, change.user.btn = TRUE, app=getApp()) {
+  restore.point("chat.ui")
    html = paste0('<div id="chat-outer" class="col-md-5">
     <div class="panel panel-primary">
         <div class="panel-heading">
 
             <span>
               Chat
-              <button class="btn btn-qc btn-xs" id="btn-raise-hand"
+            </span>
+            ' , if (show.username) paste0('<span id="chat-user-header" class="pull-right">',user,'</span>'),'
+
+            <button class="btn btn-qc btn-xs" id="btn-raise-hand"
        style="margin-left: 2em;">Raise Hand</button>
               <button class="btn btn-qc btn-xs" id="btn-lower-hand"
        style="margin-left: 5px; margin-right: 5px;">Lower Hand</button>
-            </span>
-            ' , if (show.username) paste0('<span id="chat-user-header" class="pull-right">',user,'</span>'),'
+
         </div>
         <div id="chat-body" class="panel-body" style="height: 20em">
             <ul id="chat-ul" class="chat">
