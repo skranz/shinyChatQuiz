@@ -53,15 +53,16 @@ chat.ui = function(user=app$user, is.admin=app$is.admin, show.username=TRUE, cha
     <div class="panel panel-primary">
         <div class="panel-heading">
 
-            <span>
+            <span style="margin-right: 1em">
               Chat
             </span>
-            ' , if (show.username) paste0('<span id="chat-user-header" class="pull-right">',user,'</span>'),'
-
+            <span style="margin-left: 0px">
             <button class="btn btn-qc btn-xs" id="btn-raise-hand"
-       style="margin-left: 2em;">Raise Hand</button>
+       style="margin-left: 0em;">Raise Hand</button>
               <button class="btn btn-qc btn-xs" id="btn-lower-hand"
        style="margin-left: 5px; margin-right: 5px;">Lower Hand</button>
+            <span>
+            ' , if (show.username) paste0('<br><span id="chat-user-header">',user,'</span>'),'
 
         </div>
         <div id="chat-body" class="panel-body" style="height: 20em">
