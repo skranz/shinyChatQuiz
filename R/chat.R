@@ -128,7 +128,7 @@ add.chat.entry = function(msg="message", app=getApp()) {
   msg = htmlEscape(msg)
   app$msg.entry["msg"] = msg
   time = Sys.time()
-  app$msg.entry["time"] = format(time,"%H:%M")
+  app$msg.entry["time"] = format(time,"%H:%M", tz=app$glob$tz)
 
   glob = app$glob
   row = glob$msg.counter+1
@@ -179,7 +179,7 @@ insert.newest.chat.entries = function(app=getApp()) {
 }
 
 
-insert.chat.entry = function(msg="message", user="user",initials="U", time=format(Sys.time(),"%H:%M"), color="55C1E7") {
+insert.chat.entry = function(msg="message", user="user",initials="U", time=format(Sys.time(),"%H:%M", tz=app$glob$tz), color="55C1E7", app=getApp()) {
   restore.point("insert.chat")
   callJS("insertChat", .args=list(msg=msg, user=user, initials=initials, time=time, color=color))
 }

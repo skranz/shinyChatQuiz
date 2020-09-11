@@ -218,7 +218,7 @@ save.qu.res = function(app=getApp(), glob=app$glob) {
   restore.point("save.qu.res")
   if (is.null(glob$save.dir)) return()
   if (is.null(glob$res.qu$file_id)) {
-    file_id = format(Sys.time(),"%Y-%m-%d_%H_%M_%S")
+    file_id = format(Sys.time(),"%Y-%m-%d_%H_%M_%S", tz=app$glob$tz)
     glob$qu.res$file_id = file_id
   } else {
     file_id = glob$qu.res$file_id

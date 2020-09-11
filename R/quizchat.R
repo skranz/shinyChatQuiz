@@ -17,7 +17,7 @@ viewQuizChat = function(app, roles=c("client","admin")) {
   viewApp(app,launch.browser = launch.admin.client)
 }
 
-quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.login = FALSE, login.explain="", save.dir=NULL, app.id = "qc", perma.cookie.days =365) {
+quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.login = FALSE, login.explain="", save.dir=NULL, app.id = "qc", perma.cookie.days =365, tz="Europe/Berlin") {
   restore.point("quizChatApp")
   app = eventsApp()
   glob = app$glob
@@ -31,6 +31,8 @@ quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.lo
   glob$auto.login = auto.login
   glob$login.explain = login.explain
   glob$save.dir = save.dir
+  glob$tz = tz
+
   init.qc.globals(app, lang=lang)
   app$ui = fluidPage(title = title,
     quizchat.headers(),
