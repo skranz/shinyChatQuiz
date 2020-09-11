@@ -205,6 +205,7 @@ change.user.name = function(..., app=getApp()) {
       removeModal()
       return()
     }
+    user = substring(user, 1,30)
     app$user = user
     app$initials = make.initials(user)
     app$msg.entry["user"] = user

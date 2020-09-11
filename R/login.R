@@ -27,10 +27,8 @@ set.client.login.ui = function(app=getApp(),glob=app$glob, lang=glob$lang, defau
       setUI("loginMsg","Please enter a username")
       return()
     }
-
+    user = substring(user, 1,30)
     app$perma.cookie = formValues$saveCookieCheck
-    if (nchar(user)==0)
-      user = random.nickname(sep=" ")
     init.client.app.instance(user=user)
   })
 
@@ -65,6 +63,7 @@ set.admin.login.ui = function(app=getApp(),glob=app$glob, lang=glob$lang) {
         return()
       }
     }
+    user = substring(user, 1,30)
 
     app$perma.cookie = formValues$saveCookieCheck
     init.admin.app.instance(user=user)
