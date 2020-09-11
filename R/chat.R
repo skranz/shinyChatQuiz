@@ -186,6 +186,7 @@ insert.chat.entry = function(msg="message", user="user",initials="U", time=forma
 
 
 change.user.name = function(..., app=getApp()) {
+  lang = app$glob$lang
   input.lab = if (lang=="de") "Neuer Nutzername" else "New username"
   showModal(modalDialog(footer=NULL, easyClose=TRUE,
     textInput("userInput",input.lab, app$user),
