@@ -2,7 +2,7 @@
 quizchat.example = function() {
   restore.point.options(display.restore.point = TRUE)
   library(shinyEvents)
-  app = quizChatApp(lang="de", login.explain = "Sie können Ihren echten Namen oder ein Pseudonym eintragen. Beachten Sie, dass die Vorlesung aufgezeichnet wird und dabei auch Chatnachrichten zu sehen sind.", save.dir="C:/libraries/shinyChatQuiz/saved_qu", admin.password = "test2")
+  app = quizChatApp(lang="de", login.explain = "Sie können Ihren echten Namen oder ein Pseudonym eintragen. Beachten Sie, dass die Vorlesung aufgezeichnet wird und dabei auch Chatnachrichten zu sehen sind.", save.dir="C:/libraries/shinyChatQuiz/saved_qu", admin.password = "test2", template.file= "C:/libraries/shinyChatQuiz/quizes.yaml")
   viewQuizChat(app,roles=c("client", "admin"))
 }
 
@@ -18,7 +18,7 @@ viewQuizChat = function(app, roles=c("client","admin")) {
   viewApp(app,launch.browser = launch.admin.client)
 }
 
-quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.login = FALSE, login.explain="", save.dir=NULL, app.id = "qc", perma.cookie.days =365, tz="Europe/Berlin") {
+quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.login = FALSE, login.explain="", save.dir=NULL, app.id = "qc", perma.cookie.days =365, tz="Europe/Berlin", template.file=NULL) {
   restore.point("quizChatApp")
   app = eventsApp()
   glob = app$glob
@@ -33,6 +33,8 @@ quizChatApp = function(title="QuizChat", admin.password=NULL, lang="en", auto.lo
   glob$login.explain = login.explain
   glob$save.dir = save.dir
   glob$tz = tz
+  glob$template.file = template.file
+
 
   init.qc.globals(app, lang=lang)
   app$ui = fluidPage(title = title,

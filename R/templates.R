@@ -6,7 +6,11 @@ templates.examples = function() {
 set.default.templates = function(app=getApp()) {
   glob = app$glob
   lang = glob$lang
-  file = system.file(paste0("templates/templates-",lang,".yaml"),package = "shinyChatQuiz")
+  if (!is.null(glob$template.file)) {
+    file = glob$template.file
+  } else {
+    file = system.file(paste0("templates/templates-",lang,".yaml"),package = "shinyChatQuiz")
+  }
   glob$templates = load.template.yaml(file)
 }
 

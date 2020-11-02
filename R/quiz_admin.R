@@ -36,7 +36,6 @@ show.admin.ui = function(app=getApp()) {
 init.admin.handlers = function(app=getApp()) {
   glob = app$glob
 
-
   buttonHandler("quiz-refresh-btn",fun=function(..., app=getApp()) {
     glob=app$glob
     glob$qu.res = glob$qu.run
