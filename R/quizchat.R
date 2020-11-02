@@ -6,6 +6,7 @@ quizchat.example = function() {
   viewQuizChat(app,roles=c("client", "admin"))
 }
 
+
 viewQuizChat = function(app, roles=c("client","admin")) {
   launch.admin.client = function(appUrl) {
     restore.point("launch.admin.client")
@@ -120,7 +121,7 @@ init.qc.globals = function(app, n=100, push.msg=TRUE, push.past.secs=30, lang="d
 
 adapt.glob.ans.df = function(idnum, app=getApp()) {
   glob = app$glob
-  if (NROW(glob$ans.df < idnum)) {
+  if (NROW(glob$ans.df) < idnum) {
     extra = data.frame(idnum=(NROW(glob$ans.df)+1):(2*idnum), choice = NA_integer_)
     glob$ans.df = rbind(glob$ans.df, extra)
   }
