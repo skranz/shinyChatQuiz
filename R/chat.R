@@ -142,7 +142,7 @@ add.chat.entry = function(msg="message", app=getApp()) {
   if (row+1 > n) {
     empty.mat = matrix("",nrow=n, ncol=6)
     colnames(empty.mat) = c("idnum", "msg","user", "initials","time", "color")
-    glob$msg.mat = rbind(glob$msg.mat, emtpy.mat)
+    glob$msg.mat = rbind(glob$msg.mat, empty.mat)
     glob$msg.time = c(glob$msg.time, rep(0L, n))
   }
   glob$msg.mat[row,] = app$msg.entry
