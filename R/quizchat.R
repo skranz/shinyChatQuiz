@@ -2,7 +2,9 @@
 quizchat.example = function() {
   restore.point.options(display.restore.point = TRUE)
   library(shinyEvents)
-  app = quizChatApp(lang="de", login.explain = "Sie können Ihren echten Namen oder ein Pseudonym eintragen. Beachten Sie, dass die Vorlesung aufgezeichnet wird und dabei auch Chatnachrichten zu sehen sind.", save.dir="C:/libraries/shinyChatQuiz/saved_qu", admin.password = "test2", template.file= "C:/libraries/shinyChatQuiz/quizes.yaml")
+  app = quizChatApp(lang="de", login.explain = "Sie können Ihren echten Namen oder ein Pseudonym eintragen. Beachten Sie, dass die Vorlesung aufgezeichnet wird und dabei auch Chatnachrichten zu sehen sind.", save.dir="C:/libraries/shinyChatQuiz/saved_qu", admin.password = "test2"#,
+#    template.file= "C:/libraries/shinyChatQuiz/quizes.yaml"
+  )
   viewQuizChat(app,roles=c("client", "admin"))
 }
 

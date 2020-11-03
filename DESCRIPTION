@@ -1,11 +1,11 @@
 Package: shinyChatQuiz
 Type: Package
-Title: App for online lecture support with chat and quizzes
+Title: Shiny app for online lecture support with chat and quizzes
 Version: 0.1.0
 Author: Sebastian Kranz
 Maintainer: Sebastian Kranz <sebastian.kranz@uni-ulm.de>
-Description: App for online lecture support with chat and quizzes
-License: What license is it under?
+Description: Shiny app for online lecture support with chat and quizzes
+License: GPL >= 2.0
 Encoding: UTF-8
 LazyData: true
 Depends: shinyEvents, shinyEventsPushMessage, rmdtools,
