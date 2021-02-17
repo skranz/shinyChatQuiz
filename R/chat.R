@@ -56,12 +56,12 @@ chat.ui = function(user=app$user, is.admin=app$is.admin, show.username=TRUE, cha
             <span style="margin-right: 1em">
               Chat
             </span>
-            <span style="margin-left: 0px">
-            <button class="btn btn-qc btn-xs" id="btn-raise-hand"
-       style="margin-left: 0em;">Raise Hand</button>
-              <button class="btn btn-qc btn-xs" id="btn-lower-hand"
-       style="margin-left: 5px; margin-right: 5px;">Lower Hand</button>
-            <span>
+            ', if (is.admin)  paste0('<span style="margin-left: 0px">
+            <button class="btn btn-qc btn-xs" id="pause-chat-btn"
+       style="margin-left: 0em;">Pause chat</button>
+              <button class="btn btn-qc btn-xs" id="restart-chat-btn"
+       style="margin-left: 5px; margin-right: 5px;', if (!isTRUE(app$glob$pause.chat)) 'display: none', '">Restart chat</button>
+            <span>'),'
             ' , if (show.username) paste0('<br><span id="chat-user-header">',user,'</span>'),'
 
         </div>
@@ -86,6 +86,8 @@ chat.ui = function(user=app$user, is.admin=app$is.admin, show.username=TRUE, cha
    if (change.user.btn) {
      buttonHandler("changeUserBtn",change.user.name)
    }
+
+
    HTML(html)
 }
 
@@ -111,24 +113,32 @@ inner.chat.entries = function(max.entries=20, app=getApp()) {
   ')
 }
 
-add.raise.hand.entry = function(...,app=getApp(), glob=app$glob) {
-  if (glob$lang == "de") {
-    add.chat.entry(paste0(app$user, " hebt Hand."))
-  } else {
-    add.chat.entry(paste0(app$user, " raises hand."))
-  }
-}
-add.lower.hand.entry = function(...,app=getApp(), glob=app$glob) {
-  if (glob$lang == "de") {
-    add.chat.entry(paste0(app$user, " senkt Hand wieder."))
-  } else {
-    add.chat.entry(paste0(app$user, " lowers hand again."))
-  }
+pause.chat = function(..., app=getApp()) {
+  restore.point("pause.chat")
+  if (!isTRUE(app$is.admin)) return()
+  app$glob$pause.chat = TRUE
+  shinyEvents::setHtmlHide("pause-chat-btn")
+  shinyEvents::setHtmlShow("restart-chat-btn", display="inline")
+
+  add.chat.entry(msg="Admin paused chat.")
 }
 
+restart.chat = function(..., app=getApp()) {
+  restore.point("restart.chat")
+  if (!isTRUE(app$is.admin)) return()
+  app$glob$pause.chat = FALSE
+  shinyEvents::setHtmlHide("restart-chat-btn")
+  shinyEvents::setHtmlShow("pause-chat-btn", display="inline")
+  add.chat.entry(msg="Admin restarted chat.")
+}
 
 add.chat.entry = function(msg="message", app=getApp()) {
   restore.point("add.chat.entry")
+
+  if (!isTRUE(app$is.admin) & isTRUE(app$glob$pause.chat)) {
+    return()
+  }
+
   msg = htmlEscape(msg)
   app$msg.entry["msg"] = msg
   time = Sys.time()

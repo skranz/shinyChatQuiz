@@ -118,8 +118,10 @@ init.qc.globals = function(app, n=100, push.msg=TRUE, push.past.secs=30, lang="d
   eventHandler("chatSendEvent",fun =  function(value, ..., app=getApp()) {
     add.chat.entry(msg=value,app=app)
   })
-  buttonHandler("btn-raise-hand",add.raise.hand.entry)
-  buttonHandler("btn-lower-hand",add.lower.hand.entry)
+
+  buttonHandler("pause-chat-btn", pause.chat)
+  buttonHandler("restart-chat-btn", restart.chat)
+
 
 }
 
