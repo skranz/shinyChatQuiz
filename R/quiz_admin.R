@@ -239,10 +239,12 @@ quiz.admin.outer.ui = function(app=getApp()) {
   <div class="panel panel-primary">
     <div class="panel-heading">
       Quiz
+<!---
       <button class="btn btn-qc btn-xs quiz-tab-btn" id="quizShowBtn"
      style="margin-left: 2em;">Show</button>
+-->
       <button class="btn btn-qc btn-xs quiz-tab-bt" id="quizEditBtn"
-     style="">Edit</button>
+     style="margin-left: 2em">Edit</button>
       <button class="btn btn-qc btn-xs quiz-tab-btn" id="quizResultsBtn"
      style="">Results</button>
       <span class="pull-right">
@@ -260,10 +262,12 @@ quiz.admin.outer.ui = function(app=getApp()) {
       </div>
 
     </div>
-    <div id="quiz-body" class="panel-body" style="height: 25em">
-      <div id="quizShowUI" class="shiny-html-output invisible" >', quiz.set.admin.show.ui(return.html = TRUE), '
-      </div>
-      <div id="quizEditUI" class="shiny-html-output">', quiz.set.edit.ui(return.html = TRUE),'</div>
+',
+#    <div id="quiz-body" class="panel-body" style="height: 25em">
+#      <div id="quizShowUI" class="shiny-html-output invisible" >', quiz.set.admin.show.ui(return.html = TRUE), '
+#      </div>
+
+      '<div id="quizEditUI" class="shiny-html-output">', quiz.set.edit.ui(return.html = TRUE),'</div>
       <div id="quizResultsUI" class="invisible">
         <div>
         <button class="btn btn-xs" id="quiz-refresh-btn"><i class="fas fa-sync"></i></button>
